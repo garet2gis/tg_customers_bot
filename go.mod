@@ -1,9 +1,10 @@
-module tg_customers_bot
+module github.com/garet2gis/tg_customers_bot
 
 go 1.18
 
 require (
 	github.com/BurntSushi/toml v1.1.0 // indirect
+	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1 // indirect
 	github.com/ilyakaznacheev/cleanenv v1.3.0 // indirect
 	github.com/joho/godotenv v1.4.0 // indirect
 	github.com/sirupsen/logrus v1.9.0 // indirect

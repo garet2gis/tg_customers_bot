@@ -1,9 +1,9 @@
 package config
 
 import (
+	"github.com/garet2gis/tg_customers_bot/pkg/logging"
 	"github.com/ilyakaznacheev/cleanenv"
 	"sync"
-	"tg_customers_bot/pkg/logging"
 )
 
 type Config struct {
