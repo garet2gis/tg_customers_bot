@@ -20,7 +20,7 @@ type Client interface {
 	BeginTx(ctx context.Context, txOptions pgx.TxOptions) (pgx.Tx, error)
 }
 
-func NewClient(ctx context.Context, log logging.Logger, dc config.StorageConfig) (pool *pgxpool.Pool, err error) {
+func NewClient(ctx context.Context, log *logging.Logger, dc config.StorageConfig) (pool Client, err error) {
 	dsn := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s", dc.Username, dc.Password, dc.Host, dc.Port, dc.DatabaseName)
 	err = repeatable.DoWithTries(func() error {
 		ctx, cancel := context.WithTimeout(ctx, time.Second*5)

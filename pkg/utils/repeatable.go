@@ -1,6 +1,9 @@
 package repeatable
 
-import "time"
+import (
+	"strings"
+	"time"
+)
 
 func DoWithTries(fn func() error, attempts int, delay time.Duration) (err error) {
 	for attempts > 0 {
@@ -12,4 +15,8 @@ func DoWithTries(fn func() error, attempts int, delay time.Duration) (err error)
 		return nil
 	}
 	return
+}
+
+func FormatQuery(q string) string {
+	return strings.ReplaceAll(strings.ReplaceAll(q, "\t", ""), "\n", "")
 }

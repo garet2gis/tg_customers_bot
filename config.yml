@@ -11,4 +11,4 @@ storage:
   host: localhost
   port: 5432
   database_name: test
-  maxAttempts: 5
+  max_attempts: 5

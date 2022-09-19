@@ -44,5 +44,6 @@ SELECT client.name, service.name, appointment_time
 FROM appointment
 JOIN client USING(client_id)
 JOIN service USING (service_id)
-ORDER BY appointment_time
+ORDER BY appointment_time;
 
+SELECT * from service
