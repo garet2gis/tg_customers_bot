@@ -16,6 +16,12 @@ func (b *BotRouter) handleCommand(message *tgbotapi.Message) error {
 	case startCommand:
 		msg = tgbotapi.NewMessage(message.Chat.ID, "Возможности:")
 		msg.ReplyMarkup = mainKeyboard
+	case stopCommand:
+		if err := b.chatState.Delete(message.Chat.ID, cs.ChatStateBucket); err != nil {
+			return err
+		}
+		msg = tgbotapi.NewMessage(message.Chat.ID, "Прервано")
+
 	default:
 		msg = tgbotapi.NewMessage(message.Chat.ID, fmt.Sprintf("команды %s нет", c))
 	}

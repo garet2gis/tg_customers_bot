@@ -14,6 +14,7 @@ func (b *BotRouter) handleCreateServiceBranch(message *tgbotapi.Message, curStat
 		return tgbotapi.MessageConfig{}, err
 	}
 	msg = newState.Message
+	// если ветка была закончена
 	if newState.Step < 0 {
 		if err = b.chatState.Delete(message.From.ID, cs.ChatStateBucket); err != nil {
 			return tgbotapi.MessageConfig{}, err

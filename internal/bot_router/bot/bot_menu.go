@@ -5,6 +5,7 @@ import tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 // commands
 const (
 	startCommand = "start"
+	stopCommand  = "stop"
 )
 
 // message commands
