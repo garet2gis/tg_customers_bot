@@ -27,3 +27,15 @@ func (b *BotRouter) handleCreateServiceBranch(message *tgbotapi.Message, curStat
 
 	return msg, nil
 }
+
+func (b *BotRouter) handleShowServicesBranch(message *tgbotapi.Message) (tgbotapi.MessageConfig, error) {
+	msg := tgbotapi.NewMessage(message.Chat.ID, "show_services")
+
+	newState, err := b.serviceHandler.ShowServicesHandler(context.TODO(), message)
+	if err != nil {
+		return tgbotapi.MessageConfig{}, err
+	}
+	msg = newState.Message
+
+	return msg, nil
+}

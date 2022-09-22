@@ -11,6 +11,7 @@ const (
 // message commands
 const (
 	createServiceMessage = "Добавить услугу"
+	showServiceMessage   = "Показать услуги"
 )
 
 // branches
@@ -27,5 +28,6 @@ const (
 var mainKeyboard = tgbotapi.NewReplyKeyboard(
 	tgbotapi.NewKeyboardButtonRow(
 		tgbotapi.NewKeyboardButton(createServiceMessage),
+		tgbotapi.NewKeyboardButton(showServiceMessage),
 	),
 )

@@ -17,4 +17,5 @@ type BotRouter interface {
 
 type ServiceHandler interface {
 	CreateServiceHandler(ctx context.Context, message *tgbotapi.Message, step chat_repository.State) (MessageReply, error)
+	ShowServicesHandler(ctx context.Context, message *tgbotapi.Message) (MessageReply, error)
 }

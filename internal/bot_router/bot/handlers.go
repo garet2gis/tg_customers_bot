@@ -33,7 +33,7 @@ func (b *BotRouter) handleCommand(message *tgbotapi.Message) error {
 }
 
 func (b *BotRouter) handleMessage(message *tgbotapi.Message) error {
-	msg := tgbotapi.NewMessage(message.Chat.ID, "test")
+	msg := tgbotapi.NewMessage(message.Chat.ID, "bot_router")
 
 	// проверка на существование истории переписки
 	curState, err := b.chatState.Get(message.From.ID, cs.ChatStateBucket)
@@ -50,6 +50,11 @@ func (b *BotRouter) handleMessage(message *tgbotapi.Message) error {
 	case message.Text == createServiceMessage:
 		msg = tgbotapi.NewMessage(message.Chat.ID, "Введите название")
 		if err = b.chatState.Update(message.From.ID, createService1, cs.ChatStateBucket); err != nil {
+			return err
+		}
+	case message.Text == showServiceMessage:
+		msg, err = b.handleShowServicesBranch(message)
+		if err != nil {
 			return err
 		}
 	// если пользователь ввел незначащий текст

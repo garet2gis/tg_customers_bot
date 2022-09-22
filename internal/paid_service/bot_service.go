@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/garet2gis/tg_customers_bot/pkg/logging"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"strconv"
 	"time"
 )
 
@@ -51,4 +52,18 @@ func (bs *BotService) CreateServiceStep2(ctx context.Context, message *tgbotapi.
 		return err
 	}
 	return nil
+}
+
+func (bs *BotService) ShowServices(ctx context.Context) (string, error) {
+	var msg string
+
+	all, err := bs.service.FindAll(ctx)
+	if err != nil {
+		return "", err
+	}
+	for i, s := range all {
+		msg += strconv.Itoa(i+1) + ") " + s.String() + "\n"
+	}
+
+	return msg, nil
 }
