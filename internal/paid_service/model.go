@@ -1,4 +1,4 @@
-package service
+package paid_service
 
 import "time"
 

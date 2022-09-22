@@ -1,4 +1,4 @@
-package service
+package paid_service
 
 type CreatePaidServiceDTO struct {
 	Name         string `json:"name"`

@@ -3,7 +3,7 @@ package db
 import (
 	"context"
 	"fmt"
-	"github.com/garet2gis/tg_customers_bot/internal/service"
+	"github.com/garet2gis/tg_customers_bot/internal/paid_service"
 	"github.com/garet2gis/tg_customers_bot/pkg/client/postgresql"
 	"github.com/garet2gis/tg_customers_bot/pkg/logging"
 	repeatable "github.com/garet2gis/tg_customers_bot/pkg/utils"
@@ -15,14 +15,14 @@ type Repository struct {
 	logger *logging.Logger
 }
 
-func NewRepository(client postgresql.Client, logger *logging.Logger) service.Repository {
+func NewRepository(client postgresql.Client, logger *logging.Logger) paid_service.Repository {
 	return &Repository{
 		client: client,
 		logger: logger,
 	}
 }
 
-func (r Repository) FindOne(ctx context.Context, id string) (*service.PaidService, error) {
+func (r Repository) FindOne(ctx context.Context, id string) (*paid_service.PaidService, error) {
 	q := `
 		SELECT 
 		       service.service_id, 
@@ -32,7 +32,7 @@ func (r Repository) FindOne(ctx context.Context, id string) (*service.PaidServic
 		WHERE service.service_id = $1
 		`
 	r.logger.Trace("SQL query: %s", repeatable.FormatQuery(q))
-	var s service.PaidService
+	var s paid_service.PaidService
 	err := r.client.QueryRow(ctx, q, id).Scan(&s.ID, &s.Name, &s.BaseDuration)
 	if err != nil {
 		return nil, err
@@ -40,7 +40,7 @@ func (r Repository) FindOne(ctx context.Context, id string) (*service.PaidServic
 	return &s, nil
 }
 
-func (r Repository) FindAll(ctx context.Context) ([]service.PaidService, error) {
+func (r Repository) FindAll(ctx context.Context) ([]paid_service.PaidService, error) {
 	q := `
 		SELECT 
 		       service.service_id, 
@@ -53,9 +53,9 @@ func (r Repository) FindAll(ctx context.Context) ([]service.PaidService, error) 
 	if err != nil {
 		return nil, err
 	}
-	services := make([]service.PaidService, 0)
+	services := make([]paid_service.PaidService, 0)
 	for rows.Next() {
-		var s service.PaidService
+		var s paid_service.PaidService
 		if err = rows.Scan(&s.ID, &s.Name, &s.BaseDuration); err != nil {
 			return nil, err
 		}
@@ -67,7 +67,7 @@ func (r Repository) FindAll(ctx context.Context) ([]service.PaidService, error) 
 	return services, nil
 }
 
-func (r Repository) Create(ctx context.Context, s *service.PaidService) error {
+func (r Repository) Create(ctx context.Context, s *paid_service.PaidService) error {
 	q := `
 		INSERT INTO service (name, base_duration) 
 		VALUES ($1, $2)
@@ -85,7 +85,7 @@ func (r Repository) Create(ctx context.Context, s *service.PaidService) error {
 	return nil
 }
 
-func (r Repository) Update(ctx context.Context, s service.PaidService) error {
+func (r Repository) Update(ctx context.Context, s paid_service.PaidService) error {
 	//TODO implement me
 	panic("implement me")
 }
