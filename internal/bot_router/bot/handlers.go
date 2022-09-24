@@ -10,7 +10,7 @@ import (
 )
 
 func (b *BotRouter) handleCommand(message *tgbotapi.Message) error {
-	msg := tgbotapi.NewMessage(message.Chat.ID, "Тестовое сообщение")
+	msg := tgbotapi.NewMessage(message.Chat.ID, "bot_router_command")
 	c := message.Command()
 	switch c {
 	case startCommand:
@@ -21,7 +21,6 @@ func (b *BotRouter) handleCommand(message *tgbotapi.Message) error {
 			return err
 		}
 		msg = tgbotapi.NewMessage(message.Chat.ID, "Прервано")
-
 	default:
 		msg = tgbotapi.NewMessage(message.Chat.ID, fmt.Sprintf("команды %s нет", c))
 	}
@@ -33,7 +32,7 @@ func (b *BotRouter) handleCommand(message *tgbotapi.Message) error {
 }
 
 func (b *BotRouter) handleMessage(message *tgbotapi.Message) error {
-	msg := tgbotapi.NewMessage(message.Chat.ID, "bot_router")
+	msg := tgbotapi.NewMessage(message.Chat.ID, "bot_router_message")
 
 	// проверка на существование истории переписки
 	curState, err := b.chatState.Get(message.From.ID, cs.ChatStateBucket)
@@ -57,12 +56,23 @@ func (b *BotRouter) handleMessage(message *tgbotapi.Message) error {
 		if err != nil {
 			return err
 		}
+	case message.Text == deleteServiceMessage:
+		msg, err = b.handleShowServicesBranch(message)
+		msg = tgbotapi.NewMessage(message.Chat.ID, fmt.Sprintf("Список услуг:\n%sВведите номер услуги, которую желаете удалить", msg.Text))
+		if err = b.chatState.Update(message.From.ID, deleteService1, cs.ChatStateBucket); err != nil {
+			return err
+		}
 	// если пользователь ввел незначащий текст
 	case curState == nil:
 		msg = tgbotapi.NewMessage(message.Chat.ID, "Выберите действие")
 	// если пользователь находится в ветке диалога
 	case curState.Branch == CreateServiceBranch:
 		msg, err = b.handleCreateServiceBranch(message, *curState)
+		if err != nil {
+			return err
+		}
+	case curState.Branch == DeleteServiceBranch:
+		msg, err = b.handleDeleteServiceBranch(message)
 		if err != nil {
 			return err
 		}

@@ -2,6 +2,7 @@ package paid_service
 
 import (
 	"context"
+	"errors"
 	"github.com/garet2gis/tg_customers_bot/internal/bot_router"
 	cs "github.com/garet2gis/tg_customers_bot/internal/chat_repository"
 	"github.com/garet2gis/tg_customers_bot/pkg/logging"
@@ -26,20 +27,24 @@ func (h *ServiceHandler) CreateServiceHandler(ctx context.Context, message *tgbo
 
 	switch chatState.Step {
 	case 1:
-		err := h.botService.CreateServiceStep1(message, chatState.Branch)
+		msg, err := h.botService.CreateServiceStep1(message, chatState.Branch)
 		if err != nil {
 			return bot_router.MessageReply{}, err
 		}
 
-		res.Message = tgbotapi.NewMessage(message.Chat.ID, "Введите длительность")
+		res.Message = tgbotapi.NewMessage(message.Chat.ID, msg)
 		res.Step = chatState.Step + 1
 	case 2:
-		err := h.botService.CreateServiceStep2(ctx, message, chatState.Branch)
+		msg, err := h.botService.CreateServiceStep2(ctx, message, chatState.Branch)
 		if err != nil {
+			if errors.Is(err, WrongDurationFormat) {
+				res.Message = tgbotapi.NewMessage(message.Chat.ID, "Время неправильно введено, попробуйте еще раз")
+				return res, nil
+			}
 			return bot_router.MessageReply{}, err
 		}
 
-		res.Message = tgbotapi.NewMessage(message.Chat.ID, "Услуга добавлена!")
+		res.Message = tgbotapi.NewMessage(message.Chat.ID, msg)
 		res.Step = -1
 	}
 
@@ -53,6 +58,16 @@ func (h *ServiceHandler) ShowServicesHandler(ctx context.Context, message *tgbot
 		return bot_router.MessageReply{}, err
 	}
 	res.Message = tgbotapi.NewMessage(message.Chat.ID, services)
+
+	return res, nil
+}
+
+func (h *ServiceHandler) DeleteServiceHandler(ctx context.Context, message *tgbotapi.Message) (bot_router.MessageReply, error) {
+	res := bot_router.MessageReply{}
+
+	msg := h.botService.DeleteService(ctx, message)
+
+	res.Message = tgbotapi.NewMessage(message.Chat.ID, msg)
 
 	return res, nil
 }

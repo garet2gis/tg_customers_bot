@@ -39,3 +39,19 @@ func (b *BotRouter) handleShowServicesBranch(message *tgbotapi.Message) (tgbotap
 
 	return msg, nil
 }
+
+func (b *BotRouter) handleDeleteServiceBranch(message *tgbotapi.Message) (tgbotapi.MessageConfig, error) {
+	msg := tgbotapi.NewMessage(message.Chat.ID, "delete_service")
+
+	newState, err := b.serviceHandler.DeleteServiceHandler(context.TODO(), message)
+	if err != nil {
+		return tgbotapi.MessageConfig{}, err
+	}
+	if err = b.chatState.Delete(message.From.ID, cs.ChatStateBucket); err != nil {
+		return tgbotapi.MessageConfig{}, err
+	}
+
+	msg = newState.Message
+
+	return msg, nil
+}

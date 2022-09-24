@@ -19,7 +19,7 @@ func NewService(repository Repository, logger *logging.Logger) *Service {
 
 func (s *Service) FindOne(ctx context.Context, id string) (*PaidService, error) {
 	one, err := s.repository.FindOne(ctx, id)
-	if err != err {
+	if err != nil {
 		return nil, err
 	}
 	return one, nil
@@ -27,7 +27,7 @@ func (s *Service) FindOne(ctx context.Context, id string) (*PaidService, error) 
 
 func (s *Service) FindAll(ctx context.Context) ([]PaidService, error) {
 	all, err := s.repository.FindAll(ctx)
-	if err != err {
+	if err != nil {
 		return nil, err
 	}
 	return all, nil
@@ -35,8 +35,16 @@ func (s *Service) FindAll(ctx context.Context) ([]PaidService, error) {
 
 func (s *Service) Create(ctx context.Context, ps *PaidService) (string, error) {
 	err := s.repository.Create(ctx, ps)
-	if err != err {
+	if err != nil {
 		return "", err
 	}
 	return ps.ID, nil
+}
+
+func (s *Service) Delete(ctx context.Context, id int) error {
+	err := s.repository.Delete(ctx, id)
+	if err != nil {
+		return err
+	}
+	return nil
 }

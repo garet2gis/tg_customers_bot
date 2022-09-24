@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/garet2gis/tg_customers_bot/internal/paid_service"
 	"github.com/garet2gis/tg_customers_bot/pkg/client/postgresql"
@@ -46,7 +47,8 @@ func (r Repository) FindAll(ctx context.Context) ([]paid_service.PaidService, er
 		       service.service_id, 
 		       service.name, 
 		       service.base_duration
-		FROM service 
+		FROM service
+		ORDER BY service.created_at
 		`
 	r.logger.Trace("SQL query: %s", repeatable.FormatQuery(q))
 	rows, err := r.client.Query(ctx, q)
@@ -75,7 +77,9 @@ func (r Repository) Create(ctx context.Context, s *paid_service.PaidService) err
 		`
 	r.logger.Trace("SQL query: %s", repeatable.FormatQuery(q))
 	if err := r.client.QueryRow(ctx, q, s.Name, s.BaseDuration).Scan(&s.ID); err != nil {
-		if pgErr, ok := err.(*pgconn.PgError); ok {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) {
+			pgErr = err.(*pgconn.PgError)
 			newErr := fmt.Errorf("Code: %s, Message: %s, Where: %s, Detail: %s, SQLState: %s", pgErr.Code, pgErr.Message, pgErr.Where, pgErr.Detail, pgErr.SQLState())
 			r.logger.Error(newErr)
 			return newErr
@@ -90,7 +94,36 @@ func (r Repository) Update(ctx context.Context, s paid_service.PaidService) erro
 	panic("implement me")
 }
 
-func (r Repository) Delete(ctx context.Context, id string) error {
-	//TODO implement me
-	panic("implement me")
+func (r Repository) Delete(ctx context.Context, id int) error {
+	q := `
+		DELETE 
+		FROM  service 
+		WHERE service_id IN 
+		      (SELECT service_id FROM service
+		      ORDER BY created_at
+		      LIMIT 1 OFFSET $1)
+		`
+	r.logger.Trace("SQL query: %s", repeatable.FormatQuery(q))
+
+	commandTag, err := r.client.Exec(ctx, q, id)
+	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) {
+			pgErr = err.(*pgconn.PgError)
+			newErr := fmt.Errorf("Code: %s, Message: %s, Where: %s, Detail: %s, SQLState: %s", pgErr.Code, pgErr.Message, pgErr.Where, pgErr.Detail, pgErr.SQLState())
+			if pgErr.Code == "23503" {
+				return paid_service.CanNotDeleteRowForeignKey
+			}
+
+			r.logger.Error(newErr)
+			return newErr
+		}
+		return err
+	}
+
+	if commandTag.RowsAffected() != 1 {
+		return paid_service.NoRowsDeleted
+	}
+
+	return nil
 }
