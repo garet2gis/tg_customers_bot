@@ -51,6 +51,12 @@ func (b *BotRouter) handleMessage(message *tgbotapi.Message) error {
 		if err = b.chatState.Update(message.From.ID, createService1, cs.ChatStateBucket); err != nil {
 			return err
 		}
+	case message.Text == updateServiceMessage:
+		msg, err = b.handleShowServicesBranch(message)
+		msg = tgbotapi.NewMessage(message.Chat.ID, fmt.Sprintf("Список услуг:\n%sВведите номер услуги, которую желаете изменить", msg.Text))
+		if err = b.chatState.Update(message.From.ID, updateService1, cs.ChatStateBucket); err != nil {
+			return err
+		}
 	case message.Text == showServiceMessage:
 		msg, err = b.handleShowServicesBranch(message)
 		if err != nil {
@@ -68,6 +74,11 @@ func (b *BotRouter) handleMessage(message *tgbotapi.Message) error {
 	// если пользователь находится в ветке диалога
 	case curState.Branch == CreateServiceBranch:
 		msg, err = b.handleCreateServiceBranch(message, *curState)
+		if err != nil {
+			return err
+		}
+	case curState.Branch == UpdateServiceBranch:
+		msg, err = b.handleUpdateServiceBranch(message, *curState)
 		if err != nil {
 			return err
 		}

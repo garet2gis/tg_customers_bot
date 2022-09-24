@@ -25,6 +25,14 @@ func (s *Service) FindOne(ctx context.Context, id string) (*PaidService, error) 
 	return one, nil
 }
 
+func (s *Service) FindOneByIndex(ctx context.Context, id int) (*PaidService, error) {
+	one, err := s.repository.FindOneByIndex(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return one, nil
+}
+
 func (s *Service) FindAll(ctx context.Context) ([]PaidService, error) {
 	all, err := s.repository.FindAll(ctx)
 	if err != nil {
@@ -43,6 +51,14 @@ func (s *Service) Create(ctx context.Context, ps *PaidService) (string, error) {
 
 func (s *Service) Delete(ctx context.Context, id int) error {
 	err := s.repository.Delete(ctx, id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *Service) Update(ctx context.Context, ps PaidService) error {
+	err := s.repository.Update(ctx, ps)
 	if err != nil {
 		return err
 	}

@@ -97,7 +97,7 @@ func (bs *BotService) DeleteService(ctx context.Context, message *tgbotapi.Messa
 		return "Некорректный номер услуги"
 	}
 
-	err = bs.service.Delete(ctx, id-1)
+	err = bs.service.Delete(ctx, id)
 	if err != nil {
 		if errors.Is(NoRowsDeleted, err) {
 			return "Ничего не было удалено"
@@ -109,4 +109,66 @@ func (bs *BotService) DeleteService(ctx context.Context, message *tgbotapi.Messa
 	}
 
 	return msg
+}
+
+func (bs *BotService) UpdateService1(ctx context.Context, message *tgbotapi.Message, branch string) (string, error) {
+	id, err := strconv.Atoi(message.Text)
+	if err != nil {
+		return "Некорректный номер услуги", err
+	}
+
+	serv, err := bs.service.FindOneByIndex(ctx, id)
+	if err != nil {
+		return "Нет услуг с таким номером", err
+	}
+
+	var service = &CreatePaidServiceDTO{Id: serv.ID}
+	err = bs.serviceTemporaryRepository.Update(message.From.ID, service, branch)
+	if err != nil {
+		return "", err
+	}
+	return "Введите новое название", nil
+}
+
+func (bs *BotService) UpdateService2(message *tgbotapi.Message, branch string) (string, error) {
+	serviceDTO, err := bs.serviceTemporaryRepository.Get(message.Chat.ID, branch)
+	if err != nil {
+		return "", err
+	}
+
+	serviceDTO.Name = message.Text
+	err = bs.serviceTemporaryRepository.Update(message.From.ID, serviceDTO, branch)
+	if err != nil {
+		return "", err
+	}
+
+	return "Введите новую длительность", nil
+}
+
+func (bs *BotService) UpdateService3(ctx context.Context, message *tgbotapi.Message, branch string) (string, error) {
+	serviceDTO, err := bs.serviceTemporaryRepository.Get(message.Chat.ID, branch)
+	if err != nil {
+		return "", err
+	}
+
+	duration, err := parseRussianDurationString(message.Text)
+	if err != nil {
+		return "", WrongDurationFormat
+	}
+
+	service := PaidService{
+		ID:           serviceDTO.Id,
+		Name:         serviceDTO.Name,
+		BaseDuration: duration,
+	}
+	err = bs.service.Update(ctx, service)
+	if err != nil {
+		return "Ошибка обновления", nil
+	}
+
+	err = bs.serviceTemporaryRepository.Delete(message.Chat.ID, branch)
+	if err != nil {
+		return "", err
+	}
+	return "Услуга успешно изменена!", nil
 }

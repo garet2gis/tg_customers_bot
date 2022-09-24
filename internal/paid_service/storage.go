@@ -10,6 +10,7 @@ var CanNotDeleteRowForeignKey = errors.New("Can not delete row with foreign key"
 
 type Repository interface {
 	FindOne(ctx context.Context, id string) (*PaidService, error)
+	FindOneByIndex(ctx context.Context, id int) (*PaidService, error)
 	FindAll(ctx context.Context) ([]PaidService, error)
 	Create(ctx context.Context, s *PaidService) error
 	Update(ctx context.Context, s PaidService) error

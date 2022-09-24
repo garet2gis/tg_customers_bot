@@ -57,8 +57,12 @@ ORDER BY appointment_time;
 
 select * from service;
 
-DELETE
-FROM  service
+
+SELECT
+    service_id,
+    name,
+    base_duration
+FROM service
 WHERE service_id IN
       (SELECT service_id FROM service
        ORDER BY created_at

@@ -31,7 +31,7 @@ func main() {
 		logger.Fatal(err)
 	}
 
-	boltDBClient, err := boltdb.NewKeyValueClient("bot.db", []string{cr.ChatStateBucket, br.CreateServiceBranch}, logger)
+	boltDBClient, err := boltdb.NewKeyValueClient("bot.db", []string{cr.ChatStateBucket, br.CreateServiceBranch, br.UpdateServiceBranch}, logger)
 	if err != nil {
 		logger.Fatal(err)
 	}
