@@ -31,18 +31,16 @@ func (b *BotRouter) handleCreateServiceBranch(message *tgbotapi.Message, curStat
 func (b *BotRouter) handleUpdateServiceBranch(message *tgbotapi.Message, curState cs.State) (tgbotapi.MessageConfig, error) {
 	msg := tgbotapi.NewMessage(message.Chat.ID, "Error")
 
-	newState, err := b.serviceHandler.UpdateServiceHandler(context.TODO(), message, curState)
-	if err != nil {
-		return tgbotapi.MessageConfig{}, err
-	}
+	newState := b.serviceHandler.UpdateServiceHandler(context.TODO(), message, curState)
+
 	msg = newState.Message
 	// если ветка была закончена
 	if newState.Step < 0 {
-		if err = b.chatState.Delete(message.From.ID, cs.ChatStateBucket); err != nil {
+		if err := b.chatState.Delete(message.From.ID, cs.ChatStateBucket); err != nil {
 			return tgbotapi.MessageConfig{}, err
 		}
 	} else {
-		if err = b.chatState.Update(message.From.ID, createStepString(UpdateServiceBranch, newState.Step), cs.ChatStateBucket); err != nil {
+		if err := b.chatState.Update(message.From.ID, createStepString(UpdateServiceBranch, newState.Step), cs.ChatStateBucket); err != nil {
 			return tgbotapi.MessageConfig{}, err
 		}
 	}

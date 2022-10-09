@@ -5,8 +5,8 @@ import (
 	"errors"
 )
 
-var NoRowsDeleted = errors.New("No row found to delete")
-var CanNotDeleteRowForeignKey = errors.New("Can not delete row with foreign key")
+var NoRowsDeleted = errors.New(" no row found to delete")
+var CanNotDeleteRowForeignKey = errors.New("can not delete row with foreign key")
 
 type Repository interface {
 	FindOne(ctx context.Context, id string) (*PaidService, error)

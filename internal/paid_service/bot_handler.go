@@ -51,39 +51,34 @@ func (h *ServiceHandler) CreateServiceHandler(ctx context.Context, message *tgbo
 	return res, nil
 }
 
-func (h *ServiceHandler) UpdateServiceHandler(ctx context.Context, message *tgbotapi.Message, chatState cs.State) (bot_router.MessageReply, error) {
+func (h *ServiceHandler) UpdateServiceHandler(ctx context.Context, message *tgbotapi.Message, chatState cs.State) bot_router.MessageReply {
 	res := bot_router.MessageReply{}
 
 	switch chatState.Step {
 	case 1:
 		msg, err := h.botService.UpdateService1(ctx, message, chatState.Branch)
-		if err != nil {
-			res.Message = tgbotapi.NewMessage(message.Chat.ID, msg)
-			return res, nil
-		}
 		res.Message = tgbotapi.NewMessage(message.Chat.ID, msg)
+		if err != nil {
+			return res
+		}
 		res.Step = chatState.Step + 1
 	case 2:
 		msg, err := h.botService.UpdateService2(message, chatState.Branch)
-		if err != nil {
-			res.Message = tgbotapi.NewMessage(message.Chat.ID, msg)
-			return res, nil
-		}
-
 		res.Message = tgbotapi.NewMessage(message.Chat.ID, msg)
+		if err != nil {
+			return res
+		}
 		res.Step = chatState.Step + 1
 	case 3:
 		msg, err := h.botService.UpdateService3(ctx, message, chatState.Branch)
-		if err != nil {
-			res.Message = tgbotapi.NewMessage(message.Chat.ID, msg)
-			return res, err
-		}
-
 		res.Message = tgbotapi.NewMessage(message.Chat.ID, msg)
+		if err != nil {
+			return res
+		}
 		res.Step = -1
 	}
 
-	return res, nil
+	return res
 }
 
 func (h *ServiceHandler) ShowServicesHandler(ctx context.Context, message *tgbotapi.Message) (bot_router.MessageReply, error) {

@@ -25,11 +25,15 @@ func NewBotService(serviceTemporaryRepository ServiceTemporaryRepository, reposi
 	}
 }
 
+const (
+	serviceError = "Ошабка: сервис услуг"
+)
+
 func (bs *BotService) CreateServiceStep1(message *tgbotapi.Message, branch string) (string, error) {
 	var service = &CreatePaidServiceDTO{Name: message.Text}
 	err := bs.serviceTemporaryRepository.Update(message.From.ID, service, branch)
 	if err != nil {
-		return "", err
+		return serviceError, err
 	}
 	return "Введите длительность в формате: []ч[]м", nil
 }
@@ -49,12 +53,12 @@ var WrongDurationFormat = errors.New("wrong duration format")
 func (bs *BotService) CreateServiceStep2(ctx context.Context, message *tgbotapi.Message, branch string) (string, error) {
 	serviceDTO, err := bs.serviceTemporaryRepository.Get(message.Chat.ID, branch)
 	if err != nil {
-		return "", err
+		return serviceError, err
 	}
 
 	duration, err := parseRussianDurationString(message.Text)
 	if err != nil {
-		return "", WrongDurationFormat
+		return serviceError, WrongDurationFormat
 	}
 
 	service := PaidService{
@@ -69,7 +73,7 @@ func (bs *BotService) CreateServiceStep2(ctx context.Context, message *tgbotapi.
 
 	err = bs.serviceTemporaryRepository.Delete(message.Chat.ID, branch)
 	if err != nil {
-		return "", err
+		return serviceError, err
 	}
 	return "Услуга успешно создана!", nil
 }
@@ -79,7 +83,7 @@ func (bs *BotService) ShowServices(ctx context.Context) (string, error) {
 
 	all, err := bs.service.FindAll(ctx)
 	if err != nil {
-		return "", err
+		return serviceError, err
 	}
 	for i, s := range all {
 		msg += strconv.Itoa(i+1) + ") " + s.String() + "\n"
@@ -125,7 +129,7 @@ func (bs *BotService) UpdateService1(ctx context.Context, message *tgbotapi.Mess
 	var service = &CreatePaidServiceDTO{Id: serv.ID}
 	err = bs.serviceTemporaryRepository.Update(message.From.ID, service, branch)
 	if err != nil {
-		return "", err
+		return "Ошибка сервиса", err
 	}
 	return "Введите новое название", nil
 }
@@ -133,13 +137,13 @@ func (bs *BotService) UpdateService1(ctx context.Context, message *tgbotapi.Mess
 func (bs *BotService) UpdateService2(message *tgbotapi.Message, branch string) (string, error) {
 	serviceDTO, err := bs.serviceTemporaryRepository.Get(message.Chat.ID, branch)
 	if err != nil {
-		return "", err
+		return "Ошибка сервиса", err
 	}
 
 	serviceDTO.Name = message.Text
 	err = bs.serviceTemporaryRepository.Update(message.From.ID, serviceDTO, branch)
 	if err != nil {
-		return "", err
+		return "Ошибка сервиса", err
 	}
 
 	return "Введите новую длительность", nil
@@ -148,12 +152,12 @@ func (bs *BotService) UpdateService2(message *tgbotapi.Message, branch string) (
 func (bs *BotService) UpdateService3(ctx context.Context, message *tgbotapi.Message, branch string) (string, error) {
 	serviceDTO, err := bs.serviceTemporaryRepository.Get(message.Chat.ID, branch)
 	if err != nil {
-		return "", err
+		return serviceError, err
 	}
 
 	duration, err := parseRussianDurationString(message.Text)
 	if err != nil {
-		return "", WrongDurationFormat
+		return serviceError, WrongDurationFormat
 	}
 
 	service := PaidService{
@@ -168,7 +172,7 @@ func (bs *BotService) UpdateService3(ctx context.Context, message *tgbotapi.Mess
 
 	err = bs.serviceTemporaryRepository.Delete(message.Chat.ID, branch)
 	if err != nil {
-		return "", err
+		return serviceError, err
 	}
 	return "Услуга успешно изменена!", nil
 }
